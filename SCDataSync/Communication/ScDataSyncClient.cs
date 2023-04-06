@@ -14,7 +14,6 @@ namespace SCDataSync.Communication
         internal ScDataSyncClient()
         {
             _communicator = new ScDataSyncCommunicator();
-            _fileByteArray = null;
         }
 
         internal void Run()
