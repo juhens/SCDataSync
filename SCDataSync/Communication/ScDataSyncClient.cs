@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using SCDataSync.Memory.Extensions;
 
 namespace SCDataSync.Communication
 {
@@ -23,16 +24,18 @@ namespace SCDataSync.Communication
             _communicator.UpdatePingStart();
 
             var sendDataArray = _fileByteArray ?? GetUserInput();
+            var sendDataByteSpan = sendDataArray.AsByteSpan();
             var dumpDataBuffer = new byte[sendDataArray.Length];
+            var dumpDataBufferByteSpan = dumpDataBuffer.AsByteSpan();
 
             if (sendDataArray.Length == 0)
             {
                 throw new Exception("data size is 0");
             }
 
-            _communicator.SendData(sendDataArray, 0);
+            _communicator.SendData(sendDataByteSpan, 0);
             _communicator.WaitForPendingResponse();
-            _communicator.CheckDataValidAndResend(sendDataArray, dumpDataBuffer);
+            _communicator.CheckDataValidAndResend(sendDataByteSpan, dumpDataBufferByteSpan);
             _communicator.WaitForCompleteResponse();
             _communicator.UpdatePingStop();
             CreateDumpFile(dumpDataBuffer);
@@ -50,8 +53,8 @@ namespace SCDataSync.Communication
             Console.WriteLine("1. 4byte array (uint)");
             Console.WriteLine("2. byte array (hex)");
 
-            byte[] userInputData = Array.Empty<byte>();
-            bool validInput = false;
+            var userInputData = Array.Empty<byte>();
+            var validInput = false;
 
             while (!validInput)
             {

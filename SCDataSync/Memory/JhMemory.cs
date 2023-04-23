@@ -64,16 +64,16 @@ namespace SCDataSync.Memory
         }
 
 
-        //All cache
         private IEnumerable<MemoryPage> GetMemoryPages()
         {
             MemoryBasicInformation mbi = new();
+            var mbiSize = (uint)Marshal.SizeOf(mbi);
             ulong minAddress = _minAddress;
             ulong maxAddress = _maxAddress;
 
             while (minAddress < maxAddress)
             {
-                Kernel32.VirtualQueryEx(_process.Handle, minAddress, out mbi, (uint)Marshal.SizeOf(mbi));
+                Kernel32.VirtualQueryEx(_process.Handle, minAddress, out mbi, mbiSize);
                 if (mbi is { Protect: (uint)Enums.MEM_PROTECTION.PAGE_READWRITE, State: (uint)Enums.MEM_ALLOCATION_TYPE.MEM_COMMIT })
                 {
                     var raw = new byte[mbi.RegionSize];
@@ -96,19 +96,19 @@ namespace SCDataSync.Memory
 
 
         //Memory RW
-        internal bool Read(ulong address, Span<byte> byteSpan)
+        internal bool Read(ulong address, ReadOnlySpan<byte> byteSpan)
         {
             return Kernel32.ReadProcessMemory(_process.Handle, address, ref MemoryMarshal.GetReference(byteSpan), (nuint)byteSpan.Length, out _);
         }
-        internal bool Write(ulong address, Span<byte> byteSpan)
+        internal bool Write(ulong address, ReadOnlySpan<byte> byteSpan)
         {
             return Kernel32.WriteProcessMemory(_process.Handle, address, ref MemoryMarshal.GetReference(byteSpan), (nuint)byteSpan.Length, out _);
         }
 
         //Scan
-        internal ulong? Scan(byte[] valueArr)
+        internal ulong? Scan(ReadOnlySpan<byte> valueByteSpan)
         {
-            var patternData = new PatternData(valueArr);
+            var patternData = new PatternData(valueByteSpan.ToArray());
             var result = Compare(patternData);
             GC.Collect();
             return result;

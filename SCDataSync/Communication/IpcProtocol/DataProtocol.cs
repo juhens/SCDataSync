@@ -22,18 +22,18 @@ namespace SCDataSync.Communication.IpcProtocol
         private readonly ulong _baseAddress;
         private readonly uint _maxUserSize;
 
-        private bool ReadData(ref byte[] buffer, uint index)
+        private bool ReadData(Span<byte> buffer, uint index)
         {
-            return _j.Read(_baseAddress + index, buffer.AsByteSpan());
+            return _j.Read(_baseAddress + index, buffer);
         }
 
-        internal bool ReceiveData(ref byte[] buffer, uint index)
+        internal bool ReceiveData(Span<byte> buffer, uint index)
         {
             if (buffer.Length + index > _maxUserSize)
             {
                 throw new Exception("out of index");
             }
-            return ReadData(ref buffer, index);
+            return ReadData(buffer, index);
         }
     }
 }

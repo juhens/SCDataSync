@@ -1,7 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using SCDataSync.Communication.IpcProtocol;
 using SCDataSync.Memory;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SCDataSync.Communication
 {
@@ -32,8 +34,7 @@ namespace SCDataSync.Communication
 
             //get shared memory base address
             JhMemory j = new(sc[0]);
-            byte[] pattern = "SCDATASYNC_STARTING_ADDR"u8.ToArray();
-            ulong baseAddress = j.Scan(pattern) ?? throw new Exception("Cannot find SCDataSync shared memory");
+            ulong baseAddress = j.Scan("SCDATASYNC_STARTING_ADDR"u8) ?? throw new Exception("Cannot find SCDataSync shared memory");
 
             //read header
             var headerProtocol = new HeaderProtocol(j, baseAddress);
@@ -128,40 +129,42 @@ namespace SCDataSync.Communication
             }
             while (WaitForResponse(Response.Pending) == false);
         }
-
-        //TODO: need refactoring, split method
-        internal void CheckDataValidAndResend(byte[] data, byte[] buffer)
+        internal void CheckDataValidAndResend(Span<byte> data, Span<byte> buffer)
         {
-            var count = 0;
+            var tryCount = 0;
             while (true)
             {
-                count++;
+                tryCount++;
 
-                Console.WriteLine($"check data validation {count}");
-                TrySendMessageWithLockControl(MessageType.Normal, $"데이터 검증 {count}");
-                uint startIndex = 0;
-                _dataProtocol.ReceiveData(ref buffer, startIndex);
+                Console.WriteLine($"check data validation {tryCount}");
+                TrySendMessageWithLockControl(MessageType.Normal, $"데이터 검증 {tryCount}");
 
+                //read sent data
+                const uint startIndex = 0;
+                _dataProtocol.ReceiveData(buffer, startIndex);
+
+                //make errorIndexes
                 var errorIndexes = new List<int>();
-                for (int i = 0; i < data.Length; i += BufferSize)
+                for (var i = 0; i < data.Length; i += BufferSize)
                 {
-                    int length = Math.Min(data.Length - i, BufferSize);
-                    var fileByteSpan = data.AsSpan().Slice(i, length);
-                    var dumpDataBufferByteSpan = buffer.AsSpan().Slice(i, length);
+                    var length = Math.Min(data.Length - i, BufferSize);
+                    var dataByteSpan = data.Slice(i, length);
+                    var dumpDataBufferByteSpan = buffer.Slice(i, length);
 
-                    if (!fileByteSpan.SequenceEqual(dumpDataBufferByteSpan))
+                    if (!dataByteSpan.SequenceEqual(dumpDataBufferByteSpan))
                     {
                         errorIndexes.Add(i);
                     }
                 }
 
-                for (int i = 0; i < errorIndexes.Count; i++)
+                //resend data
+                for (var i = 0; i < errorIndexes.Count; i++)
                 {
-                    int idx = errorIndexes[i];
-                    int length = Math.Min(data.Length - idx, BufferSize);
-                    var testDataSpan = data.AsSpan().Slice(idx, length);
+                    var idx = errorIndexes[i];
+                    var length = Math.Min(data.Length - idx, BufferSize);
+                    var dataByteSpan = data.Slice(idx, length);
 
-                    TrySendDataWithLockControl(testDataSpan, idx);
+                    TrySendDataWithLockControl(dataByteSpan, idx);
                     TrySendMessageWithLockControl(MessageType.Normal, $"재전송 {i + 1} / {errorIndexes.Count}");
                     Console.Write($"\rresend {i + 1} / {errorIndexes.Count}");
                 }
@@ -169,13 +172,7 @@ namespace SCDataSync.Communication
                 if (errorIndexes.Count > 0)
                 {
                     Console.WriteLine();
-                    Console.WriteLine("send pending request and wait for response");
-                    TrySendMessageWithLockControl(MessageType.Normal, $"작업대기 요청후 응답 대기중");
-                    do
-                    {
-                        TrySendRequestWithLockControl(Request.Pending);
-                    }
-                    while (WaitForResponse(Response.Pending) == false);
+                    WaitForPendingResponse();
                 }
                 else
                     break;
@@ -205,6 +202,7 @@ namespace SCDataSync.Communication
             }
         }
         //-----------------------------------------------------------------------------
+
 
         private void TrySendDataWithLockControl(ReadOnlySpan<byte> dataByteSpan, int startIndex)
         {

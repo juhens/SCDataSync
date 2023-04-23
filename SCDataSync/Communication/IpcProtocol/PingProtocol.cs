@@ -41,7 +41,6 @@ namespace SCDataSync.Communication.IpcProtocol
 
         internal bool SendUpdatePing()
         {
-
             return WritePingStruct((byte)1);
         }
     }
