@@ -26,15 +26,10 @@ namespace SCDataSync.Communication.IpcProtocol
         internal uint dataIndex;
         private readonly _32 dataBuffer;
 
-        private Span<byte> GetByteSpan()
-        {
-            var thisStructSpan = MemoryMarshal.CreateSpan(ref this, 1);
-            return MemoryMarshal.Cast<MsqcStruct, byte>(thisStructSpan);
-        }
         public override string ToString()
         {
             var sb = new StringBuilder();
-            foreach (byte b in GetByteSpan())
+            foreach (byte b in this.AsByteSpan())
             {
                 sb.Append($"{b:X2} ");
             }
@@ -44,7 +39,7 @@ namespace SCDataSync.Communication.IpcProtocol
         internal void SetData(ReadOnlySpan<byte> byteSpan)
         {
             // 8 means the sum of size request, checksum, dataLength, dataIndex
-            var sliceSpan = GetByteSpan()[8..];
+            var sliceSpan = this.AsByteSpan()[8..];
             byteSpan.CopyTo(sliceSpan);
         }
         internal void GenerateChecksum()

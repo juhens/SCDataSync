@@ -16,15 +16,10 @@ namespace SCDataSync.Communication.IpcProtocol
     {
         internal LockStatus lockStatus;
 
-        private Span<byte> GetByteSpan()
-        {
-            var thisStructSpan = MemoryMarshal.CreateSpan(ref this, 1);
-            return MemoryMarshal.Cast<LockStruct, byte>(thisStructSpan);
-        }
         public override string ToString()
         {
             var sb = new StringBuilder();
-            foreach (var b in GetByteSpan())
+            foreach (var b in this.AsByteSpan())
             {
                 sb.Append($"{b:X2} ");
             }

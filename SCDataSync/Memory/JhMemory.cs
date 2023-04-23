@@ -121,16 +121,16 @@ namespace SCDataSync.Memory
             ulong? result = null;
             foreach (var memoryPage in memoryPages)
             {
-                for (var i = 0; i <= memoryPage.byteArray.Length - pattern.byteArray.Length;)
+                for (var i = 0; i <= memoryPage.ByteArray.Length - pattern.ByteArray.Length;)
                 {
-                    for (var j = pattern.byteArray.Length - 1; j >= 0; j--)
-                        if (pattern.byteArray[j] != memoryPage.byteArray[i + j])
+                    for (var j = pattern.ByteArray.Length - 1; j >= 0; j--)
+                        if (pattern.ByteArray[j] != memoryPage.ByteArray[i + j])
                             goto Pass;
 
-                    result = memoryPage.baseAddress + (uint)i;
+                    result = memoryPage.BaseAddress + (uint)i;
                     break;
                 Pass:
-                    i += pattern.jumpTable[memoryPage.byteArray[i + pattern.byteArray.Length - 1]];
+                    i += pattern.JumpTable[memoryPage.ByteArray[i + pattern.ByteArray.Length - 1]];
                 }
             }
             return result;

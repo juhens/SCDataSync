@@ -10,15 +10,10 @@ namespace SCDataSync.Communication.IpcProtocol
     {
         internal byte updatePing;
 
-        private Span<byte> GetByteSpan()
-        {
-            var thisStructSpan = MemoryMarshal.CreateSpan(ref this, 1);
-            return MemoryMarshal.Cast<PingStruct, byte>(thisStructSpan);
-        }
         public override string ToString()
         {
             var sb = new StringBuilder();
-            foreach (var b in GetByteSpan())
+            foreach (var b in this.AsByteSpan())
             {
                 sb.Append($"{b:X2} ");
             }
@@ -46,6 +41,7 @@ namespace SCDataSync.Communication.IpcProtocol
 
         internal bool SendUpdatePing()
         {
+
             return WritePingStruct((byte)1);
         }
     }

@@ -39,15 +39,10 @@ namespace SCDataSync.Communication.IpcProtocol
         internal ConnectionStatus connectionStatus;
         internal Response response;
 
-        private Span<byte> GetByteSpan()
-        {
-            var thisStructSpan = MemoryMarshal.CreateSpan(ref this, 1);
-            return MemoryMarshal.Cast<StatusStruct, byte>(thisStructSpan);
-        }
         public override string ToString()
         {
             var sb = new StringBuilder();
-            foreach (var b in GetByteSpan())
+            foreach (var b in this.AsByteSpan())
             {
                 sb.Append($"{b:X2} ");
             }

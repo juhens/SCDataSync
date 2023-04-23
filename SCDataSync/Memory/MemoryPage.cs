@@ -4,9 +4,9 @@ internal readonly struct MemoryPage
 {
     internal MemoryPage(ulong baseAddress, byte[] byteArray)
     {
-        this.baseAddress = baseAddress;
-        this.byteArray = byteArray;
+        this.BaseAddress = baseAddress;
+        this.ByteArray = byteArray;
     }
-    internal readonly ulong baseAddress;
-    internal readonly byte[] byteArray;
+    internal readonly ulong BaseAddress;
+    internal readonly byte[] ByteArray;
 }

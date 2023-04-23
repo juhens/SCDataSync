@@ -206,17 +206,6 @@ namespace SCDataSync.Communication
         }
         //-----------------------------------------------------------------------------
 
-        //private void TrySendDataWithLockControl<T>(T[] dataArray, int startIndex) where T : unmanaged
-        //{
-        //    ReadOnlySpan<byte> dataByteSpan = MemoryMarshal.Cast<T, byte>(dataArray);
-        //    TrySendDataWithLockControl(dataByteSpan, startIndex);
-        //}
-        //private void TrySendDataWithLockControl<T>(T data, int startIndex) where T : unmanaged
-        //{
-        //    ReadOnlySpan<T> dataSpan = MemoryMarshal.CreateReadOnlySpan(ref data, 1);
-        //    ReadOnlySpan<byte> dataByteSpan = MemoryMarshal.Cast<T, byte>(dataSpan);
-        //    TrySendDataWithLockControl(dataByteSpan, startIndex);
-        //}
         private void TrySendDataWithLockControl(ReadOnlySpan<byte> dataByteSpan, int startIndex)
         {
             if (!WaitForStatus(ConnectionStatus.Connect))

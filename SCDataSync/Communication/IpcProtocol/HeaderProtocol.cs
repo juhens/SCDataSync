@@ -24,12 +24,6 @@ namespace SCDataSync.Communication.IpcProtocol
         internal uint commStatusRegionSize;
         internal uint dataRegionSize;
 
-        private Span<byte> GetByteSpan()
-        {
-            var thisStructSpan = MemoryMarshal.CreateSpan(ref this, 1);
-            return MemoryMarshal.Cast<HeaderStruct, byte>(thisStructSpan);
-        }
-
         internal readonly string GetNameAndVersion()
         {
             return $"SCDataSync {version >> 24}.{(version >> 16) & 0xFF}.{(version >> 8) & 0xFF}.{version & 0xFF}";
@@ -57,8 +51,8 @@ namespace SCDataSync.Communication.IpcProtocol
 
         internal string GetMagicNumberString()
         {
-            var sliceSpan = GetByteSpan()[..24];
-            return sliceSpan.ToString();
+            var sliceByteSpan = this.AsByteSpan()[..24];
+            return sliceByteSpan.ToString();
         }
     }
     internal class HeaderProtocol

@@ -23,15 +23,10 @@ namespace SCDataSync.Communication.IpcProtocol
 
         private readonly _512 messageBuffer;
 
-        private Span<byte> GetByteSpan()
-        {
-            var thisStructSpan = MemoryMarshal.CreateSpan(ref this, 1);
-            return MemoryMarshal.Cast<MessageStruct, byte>(thisStructSpan);
-        }
         public override string ToString()
         {
             var sb = new StringBuilder();
-            foreach (byte b in GetByteSpan())
+            foreach (byte b in this.AsByteSpan())
             {
                 sb.Append($"{b:X2} ");
             }
@@ -43,7 +38,7 @@ namespace SCDataSync.Communication.IpcProtocol
         {
             var strByteSpan = Encoding.UTF8.GetBytes(str).AsSpan();
             //4 means the sum of size messageType, unused0, unused1, unused2
-            var sliceSpan = GetByteSpan()[4..];
+            var sliceSpan = this.AsByteSpan()[4..];
 
             //Set the copy length to the smaller value between the target span and the current span,
             //and subtract 1 from the length of the slice span to leave the last byte empty.
