@@ -1,6 +1,7 @@
 ﻿using SCDataSync.Memory;
 using System.Runtime.InteropServices;
 using System.Text;
+using SCDataSync.Memory.Extensions;
 
 namespace SCDataSync.Communication.IpcProtocol
 {
@@ -20,70 +21,7 @@ namespace SCDataSync.Communication.IpcProtocol
         private readonly byte unused1;
         private readonly byte unused2;
 
-        private readonly long dummy0;
-        private readonly long dummy1;
-        private readonly long dummy2;
-        private readonly long dummy3;
-        private readonly long dummy4;
-        private readonly long dummy5;
-        private readonly long dummy6;
-        private readonly long dummy7;
-        private readonly long dummy8;
-        private readonly long dummy9;
-        private readonly long dummy10;
-        private readonly long dummy11;
-        private readonly long dummy12;
-        private readonly long dummy13;
-        private readonly long dummy14;
-        private readonly long dummy15;
-        private readonly long dummy16;
-        private readonly long dummy17;
-        private readonly long dummy18;
-        private readonly long dummy19;
-        private readonly long dummy20;
-        private readonly long dummy21;
-        private readonly long dummy22;
-        private readonly long dummy23;
-        private readonly long dummy24;
-        private readonly long dummy25;
-        private readonly long dummy26;
-        private readonly long dummy27;
-        private readonly long dummy28;
-        private readonly long dummy29;
-        private readonly long dummy30;
-        private readonly long dummy31;
-        private readonly long dummy32;
-        private readonly long dummy33;
-        private readonly long dummy34;
-        private readonly long dummy35;
-        private readonly long dummy36;
-        private readonly long dummy37;
-        private readonly long dummy38;
-        private readonly long dummy39;
-        private readonly long dummy40;
-        private readonly long dummy41;
-        private readonly long dummy42;
-        private readonly long dummy43;
-        private readonly long dummy44;
-        private readonly long dummy45;
-        private readonly long dummy46;
-        private readonly long dummy47;
-        private readonly long dummy48;
-        private readonly long dummy49;
-        private readonly long dummy50;
-        private readonly long dummy51;
-        private readonly long dummy52;
-        private readonly long dummy53;
-        private readonly long dummy54;
-        private readonly long dummy55;
-        private readonly long dummy56;
-        private readonly long dummy57;
-        private readonly long dummy58;
-        private readonly long dummy59;
-        private readonly long dummy60;
-        private readonly long dummy61;
-        private readonly long dummy62;
-        private readonly long dummy63;
+        private readonly _512 messageBuffer;
 
         private Span<byte> GetByteSpan()
         {
@@ -125,12 +63,12 @@ namespace SCDataSync.Communication.IpcProtocol
         private readonly ulong _baseAddress;
         private bool WriteMessageStruct(MessageType messageType, string str)
         {
-            MessageStruct messageStruct = new MessageStruct
+            var messageStruct = new MessageStruct
             {
                 messageType = messageType
             };
             messageStruct.SetMessage(str);
-            return _j.Write(_baseAddress, messageStruct);
+            return _j.Write(_baseAddress, messageStruct.AsByteSpan());
         }
 
         internal bool SendMessage(MessageType messageType, string str)

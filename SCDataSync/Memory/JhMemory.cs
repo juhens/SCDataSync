@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using SCDataSync.Memory.Extensions;
 using SCDataSync.Memory.Native;
 
 namespace SCDataSync.Memory
@@ -8,7 +9,7 @@ namespace SCDataSync.Memory
     internal class JhMemory
     {
         private readonly Process _process;
-        internal readonly Dictionary<string, Structs.ModuleInformation> ModulesDic;
+        internal readonly Dictionary<string, ModuleInformation> ModulesDic;
 
         private ulong _minAddress, _maxAddress;
 
@@ -21,7 +22,7 @@ namespace SCDataSync.Memory
                 throw new Exception("failed get main module information");
 
             var comparer = StringComparer.OrdinalIgnoreCase;
-            ModulesDic = new Dictionary<string, Structs.ModuleInformation>(comparer);
+            ModulesDic = new Dictionary<string, ModuleInformation>(comparer);
             if (!MakeModuleDic())
                 throw new Exception("failed make module list");
 
@@ -66,7 +67,7 @@ namespace SCDataSync.Memory
         //All cache
         private IEnumerable<MemoryPage> GetMemoryPages()
         {
-            Structs.MemoryBasicinformation mbi = new();
+            MemoryBasicInformation mbi = new();
             ulong minAddress = _minAddress;
             ulong maxAddress = _maxAddress;
 
@@ -76,7 +77,7 @@ namespace SCDataSync.Memory
                 if (mbi is { Protect: (uint)Enums.MEM_PROTECTION.PAGE_READWRITE, State: (uint)Enums.MEM_ALLOCATION_TYPE.MEM_COMMIT })
                 {
                     var raw = new byte[mbi.RegionSize];
-                    Read(mbi.BaseAddress, ref raw);
+                    Read(mbi.BaseAddress, raw.AsByteSpan());
                     yield return new MemoryPage(mbi.BaseAddress, raw);
                 }
                 if (mbi.RegionSize == 0)
@@ -94,37 +95,14 @@ namespace SCDataSync.Memory
         }
 
 
-        //Memory Read
-        internal bool Read<T>(ulong address, ref T value) where T : unmanaged
+        //Memory RW
+        internal bool Read(ulong address, Span<byte> byteSpan)
         {
-            var span = MemoryMarshal.CreateReadOnlySpan(ref value, 1);
-            var buffer = MemoryMarshal.Cast<T, byte>(span);
-            return Kernel32.ReadProcessMemory(_process.Handle, address, ref MemoryMarshal.GetReference(buffer), (nuint)buffer.Length, out _);
+            return Kernel32.ReadProcessMemory(_process.Handle, address, ref MemoryMarshal.GetReference(byteSpan), (nuint)byteSpan.Length, out _);
         }
-        internal bool Read<T>(ulong address, ref T[] value) where T : unmanaged
+        internal bool Write(ulong address, Span<byte> byteSpan)
         {
-            var buffer = MemoryMarshal.Cast<T, byte>(value);
-            return Kernel32.ReadProcessMemory(_process.Handle, address, ref MemoryMarshal.GetReference(buffer), (nuint)buffer.Length, out _);
-        }
-        internal bool Read<T>(ulong address, ref Span<T> span) where T : unmanaged
-        {
-            var buffer = MemoryMarshal.Cast<T, byte>(span);
-            return Kernel32.ReadProcessMemory(_process.Handle, address, ref MemoryMarshal.GetReference(buffer), (nuint)buffer.Length, out _);
-        }
-        internal bool Write<T>(ulong address, T value) where T : unmanaged
-        {
-            var span = MemoryMarshal.CreateReadOnlySpan(ref value, 1);
-            var buffer = MemoryMarshal.Cast<T, byte>(span);
-            return Kernel32.WriteProcessMemory(_process.Handle, address, ref MemoryMarshal.GetReference(buffer), (nuint)buffer.Length, out _);
-        }
-        internal bool Write<T>(ulong address, ref Span<T> span) where T : unmanaged
-        {
-            var buffer = MemoryMarshal.Cast<T, byte>(span);
-            return Kernel32.WriteProcessMemory(_process.Handle, address, ref MemoryMarshal.GetReference(buffer), (nuint)buffer.Length, out _);
-        }
-        internal bool Write(ulong address, byte[] value)
-        {
-            return Kernel32.WriteProcessMemory(_process.Handle, address, ref MemoryMarshal.GetArrayDataReference(value), (nuint)value.Length, out _);
+            return Kernel32.WriteProcessMemory(_process.Handle, address, ref MemoryMarshal.GetReference(byteSpan), (nuint)byteSpan.Length, out _);
         }
 
         //Scan

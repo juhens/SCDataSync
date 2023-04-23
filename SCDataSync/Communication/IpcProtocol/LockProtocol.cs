@@ -1,6 +1,7 @@
 ﻿using SCDataSync.Memory;
 using System.Runtime.InteropServices;
 using System.Text;
+using SCDataSync.Memory.Extensions;
 
 namespace SCDataSync.Communication.IpcProtocol
 {
@@ -42,16 +43,16 @@ namespace SCDataSync.Communication.IpcProtocol
         private readonly ulong _baseAddress;
         private bool WriteLockStruct(LockStatus lockStatus)
         {
-            LockStruct lockStruct = new LockStruct
+            var lockStruct = new LockStruct
             {
                 lockStatus = lockStatus
             };
-            return _j.Write(_baseAddress, lockStruct);
+            return _j.Write(_baseAddress, lockStruct.AsByteSpan());
         }
 
         private bool ReadLockStruct(ref LockStruct lockStruct)
         {
-            return _j.Read(_baseAddress, ref lockStruct);
+            return _j.Read(_baseAddress, lockStruct.AsByteSpan());
         }
 
         internal bool ReceiveLockState(ref LockStruct lockStruct)

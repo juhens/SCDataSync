@@ -1,20 +1,19 @@
 ﻿using SCDataSync.Memory;
 using System.Runtime.InteropServices;
 using System.Text;
+using SCDataSync.Memory.Extensions;
 
 namespace SCDataSync.Communication.IpcProtocol
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal struct HeaderStruct
     {
-        private readonly long _dummy0;
-        private readonly long _dummy1;
-        private readonly long _dummy2;
+        private readonly _24 magicNumber;
         internal uint version;
         internal byte userCp;
-        private readonly byte _dummy3;
-        private readonly byte _dummy4;
-        internal byte encryptedFlag;
+        private readonly byte unused0;
+        private readonly byte unused1;
+        private readonly byte unused2;
         internal uint seed;
         internal uint headerRegionSize;
         internal uint commMessageLockRegionSize;
@@ -44,7 +43,6 @@ namespace SCDataSync.Communication.IpcProtocol
             sb.AppendLine("SCDataSync");
             sb.AppendLine($"{"Version",length}{version >> 24}.{(version >> 16) & 0xFF}.{(version >> 8) & 0xFF}.{version & 0xFF}");
             sb.AppendLine($"{"UserCp",length}{userCp}");
-            sb.AppendLine($"{"EncryptedFlag",length}{(encryptedFlag == 1 ? true : false)}");
             sb.AppendLine($"{"Seed",length}{seed}");
             sb.AppendLine($"{"HeaderRegionSize",length}0x{headerRegionSize:X2}");
             sb.AppendLine($"{"CommMessageLockRegionSize",length}0x{commMessageLockRegionSize:X2}");
@@ -76,7 +74,7 @@ namespace SCDataSync.Communication.IpcProtocol
 
         private bool ReadHeaderStruct(ref HeaderStruct headerStruct)
         {
-            return _j.Read(_baseAddress, ref headerStruct);
+            return _j.Read(_baseAddress, headerStruct.AsByteSpan());
         }
 
         internal bool ReceiveHeaderInformation(ref HeaderStruct headerStruct)

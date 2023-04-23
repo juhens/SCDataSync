@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 using SCDataSync.Memory;
+using SCDataSync.Memory.Extensions;
 
 namespace SCDataSync.Communication.IpcProtocol
 {
@@ -23,10 +24,7 @@ namespace SCDataSync.Communication.IpcProtocol
         private byte checksum;
         internal byte dataLength;
         internal uint dataIndex;
-        private readonly long dummy0;
-        private readonly long dummy1;
-        private readonly long dummy2;
-        private readonly long dummy3;
+        private readonly _32 dataBuffer;
 
         private Span<byte> GetByteSpan()
         {
@@ -94,23 +92,12 @@ namespace SCDataSync.Communication.IpcProtocol
             }
                 
             msqcStruct.GenerateChecksum();
-            return _j.Write(_baseAddress, msqcStruct);
+            return _j.Write(_baseAddress, msqcStruct.AsByteSpan());
         }
 
         internal bool SendRequest(Request request)
         {
             return WriteMsqcStruct(request, 0, ReadOnlySpan<byte>.Empty);
-        }
-        internal bool SendData<T>(T value, uint dataIndex) where T : unmanaged
-        {
-            ReadOnlySpan<T> valueSpan = MemoryMarshal.CreateReadOnlySpan(ref value, 1);
-            ReadOnlySpan<byte> valueByteSpan = MemoryMarshal.Cast<T, byte>(valueSpan);
-            return WriteMsqcStruct(Request.Send, dataIndex, valueByteSpan);
-        }
-        internal bool SendData<T>(T[] value, uint dataIndex) where T : unmanaged
-        {
-            ReadOnlySpan<byte> valueByteSpan = MemoryMarshal.Cast<T, byte>(value);
-            return WriteMsqcStruct(Request.Send, dataIndex, valueByteSpan);
         }
         internal bool SendData(ReadOnlySpan<byte> valueByteSpan, uint dataIndex)
         {

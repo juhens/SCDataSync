@@ -12,6 +12,6 @@ namespace SCDataSync.Memory.Native
         public static extern uint GetModuleFileNameEx(nint hProcess, nint hModule, [Out] StringBuilder lpBaseName, [In][MarshalAs(UnmanagedType.U4)] uint nSize);
 
         [DllImport("psapi.dll", SetLastError = true)]
-        public static extern bool GetModuleInformation(nint hProcess, nint hModule, out Structs.ModuleInformation lpmodinfo, uint cb);
+        public static extern bool GetModuleInformation(nint hProcess, nint hModule, out ModuleInformation lpmodinfo, uint cb);
     }
 }

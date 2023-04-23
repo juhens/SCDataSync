@@ -1,4 +1,5 @@
 ﻿using SCDataSync.Communication;
+using SCDataSync.Memory.Extensions;
 using SCDataSync.Memory.Native;
 
 namespace SCDataSync
@@ -32,6 +33,10 @@ namespace SCDataSync
                 Thread.Sleep(5000);
             }
             Winmm.timeEndPeriod(1);
+
+            int a = 100;
+            a.AsByteSpan();
         }
+        
     }
 }

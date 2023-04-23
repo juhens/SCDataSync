@@ -1,6 +1,7 @@
 ﻿using SCDataSync.Memory;
 using System.Runtime.InteropServices;
 using System.Text;
+using SCDataSync.Memory.Extensions;
 
 namespace SCDataSync.Communication.IpcProtocol
 {
@@ -66,7 +67,7 @@ namespace SCDataSync.Communication.IpcProtocol
 
         private bool ReadStatusStruct(ref StatusStruct statusStruct)
         {
-            return _j.Read(_baseAddress, ref statusStruct);
+            return _j.Read(_baseAddress, statusStruct.AsByteSpan());
         }
 
         internal bool ReceiveStatusInformation(ref StatusStruct statusStruct)

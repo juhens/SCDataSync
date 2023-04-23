@@ -68,7 +68,7 @@ namespace SCDataSync.Communication
             _dataProtocol = new DataProtocol(j, dataBaseAddress, UserRegionSize, _headerInformation.userCp);
 
             //create task
-            _workerUpdatePing = new Task(new Action(UpdatePing));
+            _workerUpdatePing = new Task(UpdatePing);
         }
 
         
@@ -91,18 +91,7 @@ namespace SCDataSync.Communication
             }
             while (isConnect == false);
         }
-        internal void SendData<T>(T data, int startIndex) where T : unmanaged
-        {
-            ReadOnlySpan<T> dataSpan = MemoryMarshal.CreateReadOnlySpan(ref data, 1);
-            ReadOnlySpan<byte> dataByteSpan = MemoryMarshal.Cast<T, byte>(dataSpan);
-            SendData(dataByteSpan, startIndex);
-        }
-        internal void SendData<T>(T[] dataArray, int startIndex) where T : unmanaged
-        {
-            ReadOnlySpan<byte> dataByteSpan = MemoryMarshal.Cast<T, byte>(dataArray);
-            SendData(dataByteSpan, startIndex);
-        }
-        internal void SendData(ReadOnlySpan<byte> dataByteSpan, int startIndex)
+        internal void SendData(Span<byte> dataByteSpan, int startIndex)
         {
             if (dataByteSpan.Length > UserRegionSize)
             {
@@ -217,17 +206,17 @@ namespace SCDataSync.Communication
         }
         //-----------------------------------------------------------------------------
 
-        private void TrySendDataWithLockControl<T>(T[] dataArray, int startIndex) where T : unmanaged
-        {
-            ReadOnlySpan<byte> dataByteSpan = MemoryMarshal.Cast<T, byte>(dataArray);
-            TrySendDataWithLockControl(dataByteSpan, startIndex);
-        }
-        private void TrySendDataWithLockControl<T>(T data, int startIndex) where T : unmanaged
-        {
-            ReadOnlySpan<T> dataSpan = MemoryMarshal.CreateReadOnlySpan(ref data, 1);
-            ReadOnlySpan<byte> dataByteSpan = MemoryMarshal.Cast<T, byte>(dataSpan);
-            TrySendDataWithLockControl(dataByteSpan, startIndex);
-        }
+        //private void TrySendDataWithLockControl<T>(T[] dataArray, int startIndex) where T : unmanaged
+        //{
+        //    ReadOnlySpan<byte> dataByteSpan = MemoryMarshal.Cast<T, byte>(dataArray);
+        //    TrySendDataWithLockControl(dataByteSpan, startIndex);
+        //}
+        //private void TrySendDataWithLockControl<T>(T data, int startIndex) where T : unmanaged
+        //{
+        //    ReadOnlySpan<T> dataSpan = MemoryMarshal.CreateReadOnlySpan(ref data, 1);
+        //    ReadOnlySpan<byte> dataByteSpan = MemoryMarshal.Cast<T, byte>(dataSpan);
+        //    TrySendDataWithLockControl(dataByteSpan, startIndex);
+        //}
         private void TrySendDataWithLockControl(ReadOnlySpan<byte> dataByteSpan, int startIndex)
         {
             if (!WaitForStatus(ConnectionStatus.Connect))

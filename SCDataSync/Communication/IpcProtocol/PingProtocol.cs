@@ -1,6 +1,7 @@
 ﻿using SCDataSync.Memory;
 using System.Runtime.InteropServices;
 using System.Text;
+using SCDataSync.Memory.Extensions;
 
 namespace SCDataSync.Communication.IpcProtocol
 {
@@ -36,11 +37,11 @@ namespace SCDataSync.Communication.IpcProtocol
         private readonly ulong _baseAddress;
         private bool WritePingStruct(byte updatePing)
         {
-            PingStruct pingStruct = new PingStruct
+            var pingStruct = new PingStruct
             {
                 updatePing = updatePing
             };
-            return _j.Write(_baseAddress, pingStruct);
+            return _j.Write(_baseAddress, pingStruct.AsByteSpan());
         }
 
         internal bool SendUpdatePing()

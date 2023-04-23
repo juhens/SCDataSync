@@ -17,13 +17,13 @@ namespace SCDataSync.Memory.Native
         public static extern nint OpenThread(Enums.ThreadAccess dwDesiredAccess, bool bInherihThread, int dwThreadId);
 
         [DllImport("ntdll.dll", SetLastError = true, EntryPoint = "NtQueryInformationThread")]
-        public static extern int NtQueryInformationThread(nint pHandle, Enums._THREAD_INFORMATION_CLASS infoClass, ref Structs.ThreadBasicInformation instance, int sizeOfInstance, out int length);
+        public static extern int NtQueryInformationThread(nint pHandle, Enums._THREAD_INFORMATION_CLASS infoClass, ref ThreadBasicInformation instance, int sizeOfInstance, out int length);
 
         [DllImport("kernel32.dll")]
-        public static extern void GetSystemInfo(out Structs.SystemInformation lpSystemInfo);
+        public static extern void GetSystemInfo(out SystemInformation lpSystemInfo);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern int VirtualQueryEx(nint hProcess, ulong lpAddress, out Structs.MemoryBasicinformation lpBuffer, uint dwLength);
+        public static extern int VirtualQueryEx(nint hProcess, ulong lpAddress, out MemoryBasicInformation lpBuffer, uint dwLength);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern ulong VirtualAlloc([In] ulong lpAddress, nuint dwSize, Enums.MEM_ALLOCATION_TYPE flAllocationType, Enums.MEM_PROTECTION flProtect);

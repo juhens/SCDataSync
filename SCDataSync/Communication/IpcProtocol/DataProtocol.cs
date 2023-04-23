@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SCDataSync.Memory.Extensions;
 
 namespace SCDataSync.Communication.IpcProtocol
 {
@@ -23,7 +24,7 @@ namespace SCDataSync.Communication.IpcProtocol
 
         private bool ReadData(ref byte[] buffer, uint index)
         {
-            return _j.Read(_baseAddress + index, ref buffer);
+            return _j.Read(_baseAddress + index, buffer.AsByteSpan());
         }
 
         internal bool ReceiveData(ref byte[] buffer, uint index)
