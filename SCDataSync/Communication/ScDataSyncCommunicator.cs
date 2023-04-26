@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using SCDataSync.Communication.IpcProtocol;
 using SCDataSync.Memory;
+using SCDataSync.Memory.Extensions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SCDataSync.Communication
@@ -34,7 +36,8 @@ namespace SCDataSync.Communication
 
             //get shared memory base address
             JhMemory j = new(sc[0]);
-            ulong baseAddress = j.Scan("SCDATASYNC_STARTING_ADDR"u8) ?? throw new Exception("Cannot find SCDataSync shared memory");
+            var magicNumber = "SCDATASYNC_STARTING_ADDR"u8;
+            ulong baseAddress = j.Scan(magicNumber) ?? throw new Exception("Cannot find SCDataSync shared memory");
 
             //read header
             var headerProtocol = new HeaderProtocol(j, baseAddress);
@@ -92,7 +95,7 @@ namespace SCDataSync.Communication
             }
             while (isConnect == false);
         }
-        internal void SendData(Span<byte> dataByteSpan, int startIndex)
+        internal void SendData(ReadOnlySpan<byte> dataByteSpan, int startIndex)
         {
             if (dataByteSpan.Length > UserRegionSize)
             {
@@ -129,7 +132,7 @@ namespace SCDataSync.Communication
             }
             while (WaitForResponse(Response.Pending) == false);
         }
-        internal void CheckDataValidAndResend(Span<byte> data, Span<byte> buffer)
+        internal void CheckDataValidAndResend(ReadOnlySpan<byte> data, Span<byte> buffer)
         {
             var tryCount = 0;
             while (true)

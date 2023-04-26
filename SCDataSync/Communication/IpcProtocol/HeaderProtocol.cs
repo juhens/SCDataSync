@@ -68,7 +68,8 @@ namespace SCDataSync.Communication.IpcProtocol
 
         private bool ReadHeaderStruct(ref HeaderStruct headerStruct)
         {
-            return _j.Read(_baseAddress, headerStruct.AsByteSpan());
+            var span = headerStruct.AsByteSpan();
+            return _j.Read(_baseAddress, span);
         }
 
         internal bool ReceiveHeaderInformation(ref HeaderStruct headerStruct)

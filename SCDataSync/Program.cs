@@ -1,4 +1,9 @@
-﻿using SCDataSync.Communication;
+﻿using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using SCDataSync.Communication;
+using SCDataSync.Crypto;
 using SCDataSync.Memory.Extensions;
 using SCDataSync.Memory.Native;
 

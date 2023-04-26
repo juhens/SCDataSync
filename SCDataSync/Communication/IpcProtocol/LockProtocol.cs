@@ -42,12 +42,14 @@ namespace SCDataSync.Communication.IpcProtocol
             {
                 lockStatus = lockStatus
             };
-            return _j.Write(_baseAddress, lockStruct.AsByteSpan());
+            var span = lockStruct.AsReadOnlyByteSpan();
+            return _j.Write(_baseAddress, span);
         }
 
         private bool ReadLockStruct(ref LockStruct lockStruct)
         {
-            return _j.Read(_baseAddress, lockStruct.AsByteSpan());
+            var span = lockStruct.AsByteSpan();
+            return _j.Read(_baseAddress, span);
         }
 
         internal bool ReceiveLockState(ref LockStruct lockStruct)

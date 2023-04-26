@@ -63,7 +63,8 @@ namespace SCDataSync.Communication.IpcProtocol
                 messageType = messageType
             };
             messageStruct.SetMessage(str);
-            return _j.Write(_baseAddress, messageStruct.AsByteSpan());
+            var span = messageStruct.AsReadOnlyByteSpan();
+            return _j.Write(_baseAddress, span);
         }
 
         internal bool SendMessage(MessageType messageType, string str)

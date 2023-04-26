@@ -44,12 +44,10 @@ namespace SCDataSync.Communication.IpcProtocol
         }
         internal void GenerateChecksum()
         {
-            var structSpan = MemoryMarshal.CreateSpan(ref this, 1);
-            var ushortSpan = MemoryMarshal.Cast<MsqcStruct, ushort>(structSpan);
             //2 means the sum of size request, checksum, dataLength
-            var sliceSpan = ushortSpan[2..];
+            var ushortSpan = this.AsCastSpan<MsqcStruct, ushort>()[2..];
             uint sum = 0;
-            foreach (ushort s in sliceSpan)
+            foreach (var s in ushortSpan)
             {
                 sum += s;
             }
@@ -87,12 +85,14 @@ namespace SCDataSync.Communication.IpcProtocol
             }
                 
             msqcStruct.GenerateChecksum();
-            return _j.Write(_baseAddress, msqcStruct.AsByteSpan());
+            var span = msqcStruct.AsReadOnlyByteSpan();
+            return _j.Write(_baseAddress, span);
         }
 
         internal bool SendRequest(Request request)
         {
-            return WriteMsqcStruct(request, 0, ReadOnlySpan<byte>.Empty);
+            var emptySpan = ReadOnlySpan<byte>.Empty;
+            return WriteMsqcStruct(request, 0, emptySpan);
         }
         internal bool SendData(ReadOnlySpan<byte> valueByteSpan, uint dataIndex)
         {

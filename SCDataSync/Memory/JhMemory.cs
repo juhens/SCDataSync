@@ -1,8 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using SCDataSync.Memory.Extensions;
 using SCDataSync.Memory.Native;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SCDataSync.Memory
 {
@@ -68,8 +70,8 @@ namespace SCDataSync.Memory
         {
             MemoryBasicInformation mbi = new();
             var mbiSize = (uint)Marshal.SizeOf(mbi);
-            ulong minAddress = _minAddress;
-            ulong maxAddress = _maxAddress;
+            var minAddress = _minAddress;
+            var maxAddress = _maxAddress;
 
             while (minAddress < maxAddress)
             {
@@ -77,7 +79,7 @@ namespace SCDataSync.Memory
                 if (mbi is { Protect: (uint)Enums.MEM_PROTECTION.PAGE_READWRITE, State: (uint)Enums.MEM_ALLOCATION_TYPE.MEM_COMMIT })
                 {
                     var raw = new byte[mbi.RegionSize];
-                    Read(mbi.BaseAddress, raw.AsByteSpan());
+                    Read(mbi.BaseAddress, raw);
                     yield return new MemoryPage(mbi.BaseAddress, raw);
                 }
                 if (mbi.RegionSize == 0)
@@ -96,7 +98,7 @@ namespace SCDataSync.Memory
 
 
         //Memory RW
-        internal bool Read(ulong address, ReadOnlySpan<byte> byteSpan)
+        internal bool Read(ulong address, Span<byte> byteSpan)
         {
             return Kernel32.ReadProcessMemory(_process.Handle, address, ref MemoryMarshal.GetReference(byteSpan), (nuint)byteSpan.Length, out _);
         }
@@ -108,6 +110,9 @@ namespace SCDataSync.Memory
         //Scan
         internal ulong? Scan(ReadOnlySpan<byte> valueByteSpan)
         {
+            //There is an overhead of copying the array during the scanning process
+            //but i don't optimize for this
+            //because it's infrequent and don't want to use Unsafe.
             var patternData = new PatternData(valueByteSpan.ToArray());
             var result = Compare(patternData);
             GC.Collect();

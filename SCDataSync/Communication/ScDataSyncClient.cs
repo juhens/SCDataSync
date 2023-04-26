@@ -24,7 +24,7 @@ namespace SCDataSync.Communication
             _communicator.UpdatePingStart();
 
             var sendDataArray = _fileByteArray ?? GetUserInput();
-            var sendDataByteSpan = sendDataArray.AsByteSpan();
+            var sendDataByteSpan = sendDataArray.AsReadOnlyByteSpan();
             var dumpDataBuffer = new byte[sendDataArray.Length];
             var dumpDataBufferByteSpan = dumpDataBuffer.AsByteSpan();
 

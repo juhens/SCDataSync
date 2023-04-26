@@ -10,7 +10,6 @@ namespace SCDataSync.Communication.IpcProtocol
 {
     internal class DataProtocol
     {
-        //데이터 영역은 구조화 하지않음
         internal DataProtocol(JhMemory j, ulong baseAddress, uint maxUserSize, uint userCp)
         {
             this._j = j;

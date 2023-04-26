@@ -62,7 +62,8 @@ namespace SCDataSync.Communication.IpcProtocol
 
         private bool ReadStatusStruct(ref StatusStruct statusStruct)
         {
-            return _j.Read(_baseAddress, statusStruct.AsByteSpan());
+            var span = statusStruct.AsByteSpan();
+            return _j.Read(_baseAddress, ref span);
         }
 
         internal bool ReceiveStatusInformation(ref StatusStruct statusStruct)

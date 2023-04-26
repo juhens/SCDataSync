@@ -36,7 +36,8 @@ namespace SCDataSync.Communication.IpcProtocol
             {
                 updatePing = updatePing
             };
-            return _j.Write(_baseAddress, pingStruct.AsByteSpan());
+            var span = pingStruct.AsReadOnlyByteSpan();
+            return _j.Write(_baseAddress, span);
         }
 
         internal bool SendUpdatePing()
